@@ -3,7 +3,7 @@ from item import Pelicula, Llibre
 def importar_pelicules(arxiu_csv):
     pelicules = []
     ids = []
-    with open(arxiu_csv, "r") as arxiu:
+    with open(arxiu_csv, "r", encoding="utf-8") as arxiu:
         next(arxiu)
 
         for linia in arxiu:
