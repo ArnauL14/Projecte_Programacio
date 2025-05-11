@@ -10,7 +10,7 @@ class Item:
 class Pelicula(Item):
     def __init__(self, id_item, titol, generes):
         super().__init__(id_item, titol)
-        self.genere = generes  # llista de strings
+        self.genere = generes  # llista de string
 
     def __str__(self):
         return f"{self.titol} - Gèneres: {','.join(self.genere)}"
@@ -22,6 +22,9 @@ class Llibre(Item):
         self.autor = autor
         self.any = int(any_publicacio)
         self.editorial = editorial
+    
+    def get_id(self):
+        return self.id
 
     def __str__(self):
         return f"{self.titol} ({self.any}) - {self.autor}, {self.editorial}"
