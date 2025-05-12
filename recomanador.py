@@ -14,30 +14,20 @@ class RecomanadorSimple(Recomanador):
     def recomana(self, usuari_id, n):
         llista_scores = []
         matriu = self.dataset.get_valoracions().astype(object)
-        
-        """
-        # Trobar la fila de l'usuari
-        idx_usuari = None
-        for i in range(1, matriu.shape[0]):
-            if matriu[i][0] == usuari_id:
-                idx_usuari = i
-                break
-        if idx_usuari is None:
-            return []
-        
-        odio els breaks, els canvio
-        """
 
-        # Trobar la fila de l'usuari (iker)
+        # Trobar la fila de l'usuari (iker i while Arnau ;))
         idx_usuari = None
         Trobat = False
-        for i in range(1, matriu.shape[0]) and not Trobat:
+        i = 1
+        while i < matriu.shape[0] and not Trobat:
             if matriu[i][0] == usuari_id:
                 idx_usuari = i
                 Trobat = True
+            else:
+                i += 1
+
         if not Trobat:
             return []
-        
 
          # Calcular mitjana global (Avg_global)
         valors = [
@@ -99,7 +89,8 @@ print("Matriu Creada")
 #dataset_pelicula.mostra_matriu()
 print("")
 
-recomanador = RecomanadorSimple(dataset_pelicula)
+vots_minims = 10
+recomanador = RecomanadorSimple(dataset_pelicula, vots_minims)
 print("Recomanador Creat")
 
 #Quants items mostrem? 5 està al document
