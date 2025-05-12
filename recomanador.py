@@ -2,8 +2,9 @@ from dataset import DatasetLlibres, DatasetPelicules
 from abc import ABC, abstractmethod
 
 class Recomanador(ABC):
-    def __init__(self, dataset):
+    def __init__(self, dataset,vots_mínims):
         self.dataset = dataset
+        self.vots_minims = vots_mínims
 
     @abstractmethod
     def recomana(self, usuari_id, n):
@@ -13,7 +14,8 @@ class RecomanadorSimple(Recomanador):
     def recomana(self, usuari_id, n):
         llista_scores = []
         matriu = self.dataset.get_valoracions().astype(object)
-
+        
+        """
         # Trobar la fila de l'usuari
         idx_usuari = None
         for i in range(1, matriu.shape[0]):
@@ -22,6 +24,20 @@ class RecomanadorSimple(Recomanador):
                 break
         if idx_usuari is None:
             return []
+        
+        odio els breaks, els canvio
+        """
+
+        # Trobar la fila de l'usuari (iker)
+        idx_usuari = None
+        Trobat = False
+        for i in range(1, matriu.shape[0]) and not Trobat:
+            if matriu[i][0] == usuari_id:
+                idx_usuari = i
+                Trobat = True
+        if not Trobat:
+            return []
+        
 
          # Calcular mitjana global (Avg_global)
         valors = [
@@ -49,10 +65,14 @@ class RecomanadorSimple(Recomanador):
             v = len(valors_item)  # número de vots
 
             #On posem minim_vots? Quants vots minims posem?
-            minim_vots = 10
-            if v >= minim_vots:
+
+            """
+            els demano al main i li passo a la classe, així els resultats 
+            estan sota el control de l'usuari. 
+            """
+            if v >= self.vots_minims:
                 avg_item = sum(valors_item) / v
-                m = minim_vots
+                m = self.vots_minims
                 score = (v / (v + m)) * avg_item + (m / (v + m)) * avg_global
                 llista_scores.append((item_id, score))
 
@@ -82,7 +102,7 @@ print("")
 recomanador = RecomanadorSimple(dataset_pelicula)
 print("Recomanador Creat")
 
-#Quants items mostrem?
+#Quants items mostrem? 5 està al document
 nombe_items_mostrats = 5
 id_usuari = "2"
 scores = recomanador.recomana(id_usuari, nombe_items_mostrats)
