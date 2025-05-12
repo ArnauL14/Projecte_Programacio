@@ -4,10 +4,10 @@ import numpy as np
 
 
 class Dataset(ABC):
-    def __init__(self, ruta_items, ruta_valoracions, arxiu_csv):
+    def __init__(self, ruta_items, ruta_valoracions):
         self.ruta_items = ruta_items
         self.ruta_valoracions = ruta_valoracions
-        self.arxiu_csv = arxiu_csv 
+        #self.arxiu_csv = arxiu_csv 
         self.items = []       # Llista d'objectes (pel·lícules o llibres)
         self.items_ids = []   # IDs dels ítems
         self.valoracions_raw = []  # Llista de tuples (usuari, item, valoració)
@@ -18,6 +18,10 @@ class Dataset(ABC):
 
     @abstractmethod
     def carrega_items(self):
+        pass
+
+    @abstractmethod
+    def carrega_valoracions():
         pass
 
     def carrega_matriu_valoracions(self):
@@ -42,12 +46,15 @@ class Dataset(ABC):
         for fila in self.valoracions:
             print("\t".join(str(x) for x in fila))
 
+    def get_valoracions(self):
+        return self.valoracions
+
 
 class DatasetPelicules(Dataset):
-    def importar_pelicules(self):
-        self._pelicules = []
-        self._ids = []
-        with open(self.arxiu_csv, "r", encoding="utf8") as arxiu:
+    def carrega_items(self):
+        self.items = []
+        self.items_ids = []
+        with open(self.ruta_items, "r", encoding="utf8") as arxiu:
             next(arxiu)#ens saltem la primera línia
             for linia in arxiu:
                 parts = linia.strip().split(",")
@@ -56,9 +63,10 @@ class DatasetPelicules(Dataset):
                 titol = parts[1]
                 generes = parts[2].split('|') if parts[2] else []
 
-                self._ids.append(movie_id)
-                self._pelicules.append(Pelicula(movie_id, titol, generes))
-        self._ids.sort()
+                self.items_ids.append(movie_id)
+                self.items.append(Pelicula(movie_id, titol, generes))
+        self.items_ids.sort()
+
         print("OPERACIO REALITZADA AMB EXIT")
         
         # self.items, self.items_ids = importar_pelicules(self.ruta_items)
@@ -76,11 +84,11 @@ class DatasetPelicules(Dataset):
 
 
 class DatasetLlibres(Dataset):
-    def importar_llibres(self):
-        self._llibres = []
-        self._isbns = []
+    def carrega_items(self):
+        self.items = []
+        self.items_ids = []
         """ara estan gaurdats dins de la classe"""
-        with open(self.arxiu_csv, "r", encoding="utf8") as arxiu:
+        with open(self.ruta_items, "r", encoding="utf8") as arxiu:
             next(arxiu)  # salta capçalera
 
             for linia in arxiu:
@@ -92,10 +100,10 @@ class DatasetLlibres(Dataset):
                 any_publi = parts[3]
                 editorial = parts[4]
 
-                self._isbns.append(isbn)
-                self._llibres.append(Llibre(isbn, titol, autor, any_publi, editorial))
+                self.items_ids.append(isbn)
+                self.items.append(Llibre(isbn, titol, autor, any_publi, editorial))
 
-        self.isbns.sort()
+        self.items_ids.sort()
         print("OPERACIO REALITZADA AMB EXIT")
     
     """def carrega_items(self):
@@ -117,7 +125,7 @@ class DatasetLlibres(Dataset):
                 self.valoracions_raw.append((user, item, valoracio))
 
 
-print("Pelicules")
+"""print("Pelicules")
 dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/prova_pelicules.csv", "dataset/MovieLens100k/prova_valoracions.csv")
 print("Objecte Dataset Creat")
 dataset_pelicula.carrega_items()
@@ -139,4 +147,4 @@ print("Valoracions Creades")
 dataset_llibre.carrega_matriu_valoracions()
 print("Matriu Creada")
 dataset_llibre.mostra_matriu()
-print("")
+print("")"""
