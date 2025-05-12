@@ -22,9 +22,6 @@ class Llibre(Item):
         self.autor = autor
         self.any = int(any_publicacio)
         self.editorial = editorial
-    
-    def get_id(self):
-        return self.id
 
     def __str__(self):
         return f"{self.titol} ({self.any}) - {self.autor}, {self.editorial}"
