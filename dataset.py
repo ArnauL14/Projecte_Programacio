@@ -1,12 +1,13 @@
-from importar import importar_pelicules, importar_llibres
+from item import Pelicula, Llibre
 from abc import ABC, abstractmethod
 import numpy as np
 
 
 class Dataset(ABC):
-    def __init__(self, ruta_items, ruta_valoracions):
+    def __init__(self, ruta_items, ruta_valoracions, arxiu_csv):
         self.ruta_items = ruta_items
         self.ruta_valoracions = ruta_valoracions
+        self.arxiu_csv = arxiu_csv 
         self.items = []       # Llista d'objectes (pel·lícules o llibres)
         self.items_ids = []   # IDs dels ítems
         self.valoracions_raw = []  # Llista de tuples (usuari, item, valoració)
@@ -43,11 +44,28 @@ class Dataset(ABC):
 
 
 class DatasetPelicules(Dataset):
-    def carrega_items(self):
-        self.items, self.items_ids = importar_pelicules(self.ruta_items)
+    def importar_pelicules(self):
+        self._pelicules = []
+        self._ids = []
+        with open(self.arxiu_csv, "r", encoding="utf8") as arxiu:
+            next(arxiu)#ens saltem la primera línia
+            for linia in arxiu:
+                parts = linia.strip().split(",")
+
+                movie_id = int(parts[0])
+                titol = parts[1]
+                generes = parts[2].split('|') if parts[2] else []
+
+                self._ids.append(movie_id)
+                self._pelicules.append(Pelicula(movie_id, titol, generes))
+        self._ids.sort()
+        print("OPERACIO REALITZADA AMB EXIT")
+        
+        # self.items, self.items_ids = importar_pelicules(self.ruta_items)
 
     def carrega_valoracions(self):
-        with open(self.ruta_valoracions, "r") as arxiu:
+        #mirar de canviar lo de la ruta
+        with open(self.ruta_valoracions, "r", encoding="utf8") as arxiu:
             next(arxiu)  # Saltar la capçalera
             for linia in arxiu:
                 parts = linia.strip().split(",")
@@ -58,8 +76,30 @@ class DatasetPelicules(Dataset):
 
 
 class DatasetLlibres(Dataset):
-    def carrega_items(self):
-        self.items, self.items_ids = importar_llibres(self.ruta_items)
+    def importar_llibres(self):
+        self._llibres = []
+        self._isbns = []
+        """ara estan gaurdats dins de la classe"""
+        with open(self.arxiu_csv, "r", encoding="utf8") as arxiu:
+            next(arxiu)  # salta capçalera
+
+            for linia in arxiu:
+                parts = linia.strip().split(",")
+
+                isbn = parts[0]
+                titol = parts[1]
+                autor = parts[2]
+                any_publi = parts[3]
+                editorial = parts[4]
+
+                self._isbns.append(isbn)
+                self._llibres.append(Llibre(isbn, titol, autor, any_publi, editorial))
+
+        self.isbns.sort()
+        print("OPERACIO REALITZADA AMB EXIT")
+    
+    """def carrega_items(self):
+        self.items, self.items_ids = importar_llibres(self.ruta_items)"""
 
     def carrega_valoracions(self):
         with open(self.ruta_valoracions, "r") as arxiu:
