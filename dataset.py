@@ -7,7 +7,6 @@ class Dataset(ABC):
     def __init__(self, ruta_items, ruta_valoracions):
         self.ruta_items = ruta_items
         self.ruta_valoracions = ruta_valoracions
-        #self.arxiu_csv = arxiu_csv 
         self.items = []       # Llista d'objectes (pel·lícules o llibres)
         self.items_ids = []   # IDs dels ítems
         self.valoracions_raw = []  # Llista de tuples (usuari, item, valoració)
