@@ -1,10 +1,14 @@
-from dataset import DatasetLlibres, DatasetPelicules
+from dataset import DatasetLlibres, DatasetPelicules, Dataset
 from abc import ABC, abstractmethod
 
 class Recomanador(ABC):
-    def __init__(self, dataset,vots_mínims):
-        self.dataset = dataset
-        self.vots_minims = vots_mínims
+    def __init__(self, tipus_dataset, ruta_items, ruta_valoracions):
+        if tipus_dataset == "pelicules":
+            self.dataset = DatasetPelicules(ruta_items, ruta_valoracions)
+        elif tipus_dataset == "llibres":
+            self.dataset = DatasetLlibres(ruta_items, ruta_valoracions)
+        else:
+            raise ValueError("Tipus de dataset no reconegut")
 
     @abstractmethod
     def recomana(self, usuari_id, n):
@@ -60,14 +64,13 @@ class RecomanadorSimple(Recomanador):
             els demano al main i li passo a la classe, així els resultats 
             estan sota el control de l'usuari. 
             """
-            if v >= self.vots_minims:
+            if v >= n:
                 avg_item = sum(valors_item) / v
-                m = self.vots_minims
-                score = (v / (v + m)) * avg_item + (m / (v + m)) * avg_global
+                score = (v / (v + n)) * avg_item + (n / (v + n)) * avg_global
                 llista_scores.append((item_id, score))
 
         llista_scores.sort(key=lambda x: x[1], reverse=True)
-        return llista_scores[:n]
+        return llista_scores[:5]
     
 
 class RecomanadorCollaboratiu(Recomanador):
@@ -77,6 +80,11 @@ class RecomanadorCollaboratiu(Recomanador):
 
 
 print("Pelicules")
+reco = RecomanadorSimple("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
+scores = reco.recomana("1", 10)
+print(scores)
+
+"""
 #dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/prova_pelicules.csv", "dataset/MovieLens100k/prova_valoracions.csv")
 dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 print("Objecte Dataset Creat")
@@ -97,4 +105,4 @@ print("Recomanador Creat")
 nombe_items_mostrats = 5
 id_usuari = "2"
 scores = recomanador.recomana(id_usuari, nombe_items_mostrats)
-print(scores)
+print(scores)"""
