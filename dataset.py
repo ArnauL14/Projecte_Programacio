@@ -15,6 +15,7 @@ class Dataset(ABC):
 
         self.carrega_items()
         self.carrega_valoracions()
+        self.carrega_matriu_valoracions()
 
     @abstractmethod
     def carrega_items(self):
