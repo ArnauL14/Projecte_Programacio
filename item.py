@@ -20,7 +20,7 @@ class Llibre(Item):
     def __init__(self, isbn, titol, autor, any_publicacio, editorial):
         super().__init__(isbn, titol)
         self.autor = autor
-        self.any = int(any_publicacio)
+        self.any = any_publicacio
         self.editorial = editorial
 
     def __str__(self):
