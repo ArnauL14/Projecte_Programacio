@@ -142,11 +142,11 @@ class RecomanadorCollaboratiu(Recomanador):
         return prediccions[:5]
 
 
-print("Simple")
+"""print("Simple")
 reco = RecomanadorSimple("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
-scores = reco.recomana("1", 300)
+scores = reco.recomana("10", 10)
 print(scores)
-print("")
+print("")"""
 
 print("Colaboratiu")
 reco2 = RecomanadorCollaboratiu("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
