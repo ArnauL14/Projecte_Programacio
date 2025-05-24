@@ -1,6 +1,6 @@
 import logging
 from recomanador import RecomanadorSimple, RecomanadorCollaboratiu, RecomanadorContingut
-#from avaluador import Avaluador  # assumeix que ja el tens
+from avaluador import Avaluador
 import sys
 import pickle
 
@@ -59,7 +59,8 @@ def main():
     logging.info("Inici del sistema de recomanació")
     usuari = input("Introdueix l'ID de l'usuari: ").strip()
 
-    while True:
+    while True and opcio != "3":
+        print("\nBenvingut al sistema de recomanació!")
         print("\nOpcions:")
         print("1. Recomanar ítems")
         print("2. Avaluar mètode")
@@ -82,21 +83,33 @@ def main():
             elif tipus_recomanador == "contingut":
                 recomanador = RecomanadorContingut(tipus, ruta_items, ruta_valoracions)
                 recomanador.recomana(usuari)
+            else:
+                logging.error(f"Tipus de recomanador no vàlid: {tipus_recomanador}")
+                print("Tipus de recomanador no vàlid. Torna-ho a intentar.")
+                continue
             logging.info(f"Recomanacions per a l'usuari {usuari} amb el recomanador {tipus_recomanador} fetes amb èxit")
 
         if opcio == "2":
-            """Aquesta part del codi hauria de ser implementada per a l'avaluació del mètode."""
+            logging.info(f"Usuari {usuari} ha seleccionat recomanar ítems")
+            tipus = seleccionar_dataset()
+            ruta_items, ruta_valoracions = seleccionar_rutes(tipus)
+            logging.info(f"Carregant dataset de {tipus} des de {ruta_items} i {ruta_valoracions}")
+            rmse = Avaluador.calcula_rmse()
+            mse = Avaluador.calcula_mae()
+            print(f"RMSE: {rmse}, MAE: {mse}")
+            logging.info(f"Avaluació del mètode feta amb èxit: RMSE={rmse}, MAE={mse}")
             
         elif opcio == "3":
             logging.info("Sortint del sistema de recomanació")
             print("Sortint...")
-            break #@Iker, es pot canviar si vols per un while opcio =! 3
+            
 
         else:
             print("Opció no vàlida. Torna-ho a intentar.")
             continue
 
-        logging.info("Programa finalitzat amb èxit")
+    logging.info("Programa finalitzat amb èxit")
 
 if __name__ == "__main__":
     main()
+#@arnibro bro thinks he is in xoi ahhhh moment
