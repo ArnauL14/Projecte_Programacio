@@ -15,6 +15,15 @@ class Recomanador(ABC):
 
     @abstractmethod
     def recomana(self, usuari_id, n):
+        """
+        Mètode abstracte per recomanar ítems a un usuari.
+        Args:
+            usuari_id (str): Identificador de l'usuari.
+            n (int): Paràmetre per a la recomanació, pot ser el mínim de vots requerits o el nombre d'usuaris similars.
+        Returns:
+            None
+        Aquesta funció ha de ser implementada per les subclasses.
+        """
         pass
 
     def trobar_index_usuari(self, usuari_id):
@@ -40,6 +49,11 @@ class Recomanador(ABC):
         return idx_usuari
     
     def calcula_mitjana_global(self):
+        """
+        Calcula la mitjana global de les valoracions de la matriu.
+        Returns:
+            float: Mitjana global de les valoracions sense contar 0s.
+        """
         valors = [
             float(self.matriu[i][j])
             for i in range(1, self.matriu.shape[0])
@@ -49,7 +63,21 @@ class Recomanador(ABC):
         return sum(valors) / len(valors) if valors else 0
 
     def get_valoracions_numeriques(self):
+        """
+        Retorna la matriu de valoracions numèriques sense capçalera.
+        """
         return self.matriu[1:, 1:].astype(float)
+    
+    def mostrar_recomancions(self, recomanacions):
+        """
+        Mostra les recomanacions d'una manera llegible.
+        
+        Args:
+            recomanacions (list): Llista de tuples (item_id, score).
+        """
+        for item_id, score in recomanacions:
+            item = self.dataset.get_item(item_id)
+            print(f"{item} --> Score: {score:.2f}")
 
 
 class RecomanadorSimple(Recomanador):
@@ -84,7 +112,8 @@ class RecomanadorSimple(Recomanador):
                 llista_scores.append((item_id, score))
 
         llista_scores.sort(key=lambda x: x[1], reverse=True)
-        return llista_scores[:5]
+
+        self.mostrar_recomancions(llista_scores[:5])
     
 
 class RecomanadorCollaboratiu(Recomanador):
@@ -149,7 +178,8 @@ class RecomanadorCollaboratiu(Recomanador):
                 prediccions.append((item_id, float(prediccio)))
 
         prediccions.sort(key=lambda x: x[1], reverse=True)
-        return prediccions[:5]
+        
+        self.mostrar_recomancions(prediccions[:5])
     
 
 class RecomanadorContingut(Recomanador):
@@ -205,7 +235,7 @@ class RecomanadorContingut(Recomanador):
         divisor = np.count_nonzero(valoracions)
         return profile / divisor if divisor > 0 else profile
 
-    def recomana(self, user_id, n=5):
+    def recomana(self, user_id):
         profile = self.build_user_profile(user_id)
         if profile is None:
             return []
@@ -220,28 +250,31 @@ class RecomanadorContingut(Recomanador):
             if valoracions[i] == 0
         ]
         recomanacions.sort(key=lambda x: x[1], reverse=True)
-        return recomanacions[:n]
+
+        self.mostrar_recomancions(recomanacions[:5])
 
 
 """print("Simple")
 reco = RecomanadorSimple("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 scores = reco.recomana("10", 10)
-print(scores)
 print("")"""
 
-print("Colaboratiu")
+"""print("Colaboratiu")
 reco2 = RecomanadorCollaboratiu("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 scores2 = reco2.recomana("1", 5)
-print(scores2)
-print("")
+print("")"""
 
-print("Contingut")
+"""print("Contingut")
 reco3 = RecomanadorContingut("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
-scores3 = reco3.recomana("1", 5)
-print(scores3)
-print("")
+reco3.recomana("1") #@Iker, els scores de aquesta funció sembla que van de 0 a 1, no sé si és correcte o no
+print("") """
+
+"""print("Simple Llibres")
+reco = RecomanadorSimple("llibres", "dataset/Books/prova_llibres.csv", "dataset/Books/prova_valoracions.csv")
+scores = reco.recomana("1", 0)
+print(scores)"""
 
 """
-#dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/prova_pelicules.csv", "dataset/MovieLens100k/prova_valoracions.csv")
+dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/prova_pelicules.csv", "dataset/MovieLens100k/prova_valoracions.csv")
 dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 """
