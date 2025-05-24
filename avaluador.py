@@ -1,5 +1,5 @@
 import numpy as np
-from dataset import Dataset
+from dataset import DatasetPelicules, DatasetLlibres, Dataset
 
 
 class Avaluador:
@@ -30,6 +30,7 @@ class Avaluador:
         """
         mse = np.mean((self._valoracins_reals - self._valoracions) ** 2)
         return np.sqrt(mse)
+    
 
 """dataset = DatasetPelicules("dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 matriu_real = dataset.get_valoracions_numeriques() + 2
