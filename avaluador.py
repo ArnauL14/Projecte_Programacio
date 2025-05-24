@@ -14,7 +14,7 @@ class Avaluador:
     def __init__(self, valoracins_reals, dataset): 
         self._valoracins_reals = valoracins_reals # Matriu de valoracions reals
         self._dataset = dataset
-        self._valoracions = dataset.get_valoracions()
+        self._valoracions = dataset.get_valoracions_numeriques()
 
     def calcula_mae(self):
         """
@@ -30,3 +30,9 @@ class Avaluador:
         """
         mse = np.mean((self._valoracins_reals - self._valoracions) ** 2)
         return np.sqrt(mse)
+
+"""dataset = DatasetPelicules("dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
+matriu_real = dataset.get_valoracions_numeriques() + 2
+avaluador = Avaluador(matriu_real, dataset)
+print("MAE:", avaluador.calcula_mae())
+print("RMSE:", avaluador.calcula_rmse())"""
