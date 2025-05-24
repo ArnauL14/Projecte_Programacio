@@ -31,6 +31,8 @@ class Dataset(ABC):
         self.valoracions_raw = []
         self.valoracions = []
 
+    def get_valoracions_numeriques(self):
+        return self.valoracions[1:, 1:].astype(float)
     @abstractmethod
     def carrega_items(self):
         """Carrega els ítems del dataset."""
