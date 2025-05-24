@@ -1,6 +1,7 @@
 from dataset import DatasetLlibres, DatasetPelicules, Dataset
 from abc import ABC, abstractmethod
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 class Recomanador(ABC):
     def __init__(self, tipus_dataset, ruta_items, ruta_valoracions):
@@ -17,6 +18,15 @@ class Recomanador(ABC):
         pass
 
     def trobar_index_usuari(self, usuari_id):
+        """
+        Troba l'índex del vector corresponent a l'usuari dins la matriu.
+
+        Args:
+            usuari_id (str): Identificador de l'usuari.
+
+        Returns:
+            int | None: Índex de l'usuari o None si no es troba.
+        """
         idx_usuari = None
         Trobat = False
         i = 1
@@ -140,6 +150,77 @@ class RecomanadorCollaboratiu(Recomanador):
 
         prediccions.sort(key=lambda x: x[1], reverse=True)
         return prediccions[:5]
+    
+
+class RecomanadorContingut(Recomanador):
+    """
+    Sistema de recomanació basat en contingut.
+    Hereta d'una classe abstracta Recomanador i utilitza TF-IDF per generar recomanacions
+    segons el contingut (gèneres, descripcions, etc.) dels ítems.
+
+    Attributes:
+        dataset (Dataset): Instància del conjunt de dades (llibres o pel·lícules).
+        matriu (np.ndarray): Matriu de valoracions dels usuaris.
+        tfidf_matrix (np.ndarray): Matriu TF-IDF dels ítems.
+        vectorizer (TfidfVectorizer): Vectoritzador TF-IDF de sklearn.
+    
+        """
+    def __init__(self, tipus_dataset, ruta_items, ruta_valoracions):
+        super().__init__(tipus_dataset, ruta_items, ruta_valoracions)
+        self.vectorizer = TfidfVectorizer(stop_words="english")
+        self.tfidf_matrix = None
+        self.fit()
+
+    def cosine_similarity(self, matriu, vector):
+        """
+        Calcula la similitud cosinus entre un vector i cada fila d'una matriu.
+        :param matriu: np.array de shape (n, d)
+        :param vector: np.array de shape (d,)
+        :return: np.array de shape (n,) amb la similitud cosinus per fila
+        """
+        norm_vector = np.linalg.norm(vector)
+        norm_matriu = np.linalg.norm(matriu, axis=1)
+
+        with np.errstate(divide='ignore', invalid='ignore'):
+            producte_escalar = matriu @ vector
+            similituds = producte_escalar / (norm_matriu * norm_vector)
+            similituds = np.nan_to_num(similituds)
+
+        return similituds
+
+    def fit(self):
+        item_texts = self.dataset.get_descriptors()
+        self.tfidf_matrix = self.vectorizer.fit_transform(item_texts).toarray()
+
+    def build_user_profile(self, user_id):
+        idx = self.trobar_index_usuari(user_id)
+        if idx is None:
+            return None
+
+        valoracions = self.matriu[idx, 1:].astype(float)
+        profile = np.zeros(self.tfidf_matrix.shape[1])
+        for i, score in enumerate(valoracions):
+            if score > 0:
+                profile += score * self.tfidf_matrix[i]
+        divisor = np.count_nonzero(valoracions)
+        return profile / divisor if divisor > 0 else profile
+
+    def recomana(self, user_id, n=5):
+        profile = self.build_user_profile(user_id)
+        if profile is None:
+            return []
+
+        sim_scores = self.cosine_similarity(self.tfidf_matrix, profile)
+
+        idx_usuari = self.trobar_index_usuari(user_id)
+        valoracions = self.matriu[idx_usuari, 1:].astype(float)
+        recomanacions = [
+            (self.matriu[0][i + 1], score)
+            for i, score in enumerate(sim_scores)
+            if valoracions[i] == 0
+        ]
+        recomanacions.sort(key=lambda x: x[1], reverse=True)
+        return recomanacions[:n]
 
 
 """print("Simple")
@@ -152,6 +233,12 @@ print("Colaboratiu")
 reco2 = RecomanadorCollaboratiu("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 scores2 = reco2.recomana("1", 5)
 print(scores2)
+print("")
+
+print("Contingut")
+reco3 = RecomanadorContingut("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
+scores3 = reco3.recomana("1", 5)
+print(scores3)
 print("")
 
 """
