@@ -2,6 +2,9 @@ from item import Pelicula, Llibre
 from abc import ABC, abstractmethod
 import numpy as np
 import csv
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 
 class Dataset(ABC):
@@ -31,8 +34,6 @@ class Dataset(ABC):
         self.valoracions_raw = []
         self.valoracions = []
 
-    def get_valoracions_numeriques(self):
-        return self.valoracions[1:, 1:].astype(float)
     @abstractmethod
     def carrega_items(self):
         """Carrega els ítems del dataset."""
@@ -104,8 +105,11 @@ class DatasetPelicules(Dataset):
                     self.items_ids.append(movie_id)
                 except (IndexError, ValueError):
                     print(f"Línia malformada o invàlida: {parts}")
+                    logging.error(f"Línia malformada o invàlida: {parts}")
         self.items_ids.sort()
         print("Pelicules carregades correctament.")
+        logging.info("Pelicules carregades correctament.")
+        
 
     def carrega_valoracions(self):
         with open(self.ruta_valoracions, "r", encoding="utf8") as arxiu:
@@ -119,9 +123,16 @@ class DatasetPelicules(Dataset):
                     self.valoracions_raw.append((user, item, valoracio))
                 except (IndexError, ValueError):
                     print(f"Valoració malformada: {parts}")
+                    logging.error(f"Valoració malformada: {parts}")
+        logging.info("Valoracions de pel·lícules carregades correctament.")
+        print("Valoracions de pel·lícules carregades correctament.")
 
     def get_descriptors(self):
         """Retorna descriptors (gèneres) de cada pel·lícula."""
+        logging.info("Obtenint descriptors de les pel·lícules.")
+        if not self.items:
+            logging.warning("No hi ha pel·lícules carregades.")
+            return []
         return [' '.join(p.genere) for p in self.items]
 
 
@@ -171,8 +182,11 @@ class DatasetLlibres(Dataset):
                     self.items_ids.append(isbn)
                 except (IndexError, ValueError):
                     print(f"Línia malformada: {parts}")
-
+                    logging.error(f"Línia malformada: {parts}")
+                    continue
+            
         self.items_ids.sort()
+        logging.info("Llibres carregats correctament.")
         print("Llibres carregats correctament.")
 
     def carrega_valoracions(self):
@@ -205,3 +219,6 @@ class DatasetLlibres(Dataset):
                     self.valoracions_raw.append((user, item, valoracio))
                 except (IndexError, ValueError):
                     print(f"Valoració malformada: {parts}")
+                    logging.error(f"Valoració malformada: {parts}")
+        logging.info("Valoracions de llibres carregades correctament.")
+        print("Valoracions de llibres carregades correctament.")
