@@ -49,6 +49,24 @@ class Dataset(ABC):
         """
         logging.info("Obtenint valoracions numèriques (sense capçaleres)")
         return self._valoracions[1:, 1:].astype(float)
+    
+    def get_valoracions_usuari(self, id_usuari):
+        """
+        Retorna les valoracions d'un usuari específic com una matriu de forma (1, n).
+
+        Args:
+            id_usuari (str): ID de l'usuari per al qual es volen les valoracions.
+
+        Returns:
+            np.ndarray: Matriu de valoracions de l'usuari amb una fila (1, n).
+        """
+        logging.info(f"Obtenint valoracions per a l'usuari {id_usuari}")
+        if id_usuari not in self._valoracions[:, 0]:
+            logging.warning(f"Usuari {id_usuari} no trobat en les valoracions")
+            return None
+
+        index = np.where(self._valoracions[:, 0] == id_usuari)[0][0]
+        return self._valoracions[index:index+1, 1:]
 
     @abstractmethod
     def carrega_items(self):
@@ -186,7 +204,7 @@ class DatasetPelicules(Dataset):
             for linia in arxiu:
                 parts = linia.strip().split(",")
                 try:
-                    user = parts[0]
+                    user = str(parts[0])
                     item = int(parts[1])
                     valoracio = float(parts[2])
                     self._valoracions_raw.append((user, item, valoracio))
@@ -259,10 +277,9 @@ class DatasetLlibres(Dataset):
             for linia in arxiu:
                 parts = linia.strip().split(",")
                 try:
-                    user = parts[0]
+                    user = str(parts[0])
                     item = parts[1]
                     if item not in self._items_ids:
-                        logging.warning(f"Valoració no afegida: ítem {item} no trobat")
                         continue
                     raw_valoracio = float(parts[2])
                     # Si és 0, considerem que no hi ha puntuació
@@ -279,5 +296,16 @@ class DatasetLlibres(Dataset):
 
 """dataset_pelicula = DatasetPelicules("dataset/MovieLens100k/prova_pelicules.csv", "dataset/MovieLens100k/prova_valoracions.csv")
 print("Objecte Dataset Creat")
-pelicula = dataset_pelicula.get_item(4)
+
+valroacions_usuari = dataset_pelicula.get_valoracions_usuari("1")
+print("Valoracions de l'usuari 1:")
+print(valroacions_usuari)"""
+
+"""dataset_llibre = DatasetLlibres("dataset/Books/Books.csv", "dataset/Books/Ratings.csv")
+valoracions_usuari_llibre = dataset_llibre.get_valoracions_usuari("276725")
+print("Valoracions de l'usuari 276725:")
+print(valoracions_usuari_llibre)"""
+
+
+"""pelicula = dataset_pelicula.get_item(4)
 print(pelicula)"""
