@@ -117,9 +117,11 @@ class Recomanador(ABC):
         Args:
             recomanacions (list): Llista de tuples (item_id, score).
         """
+        print("")
         for item_id, score in recomanacions:
             item = self._dataset.get_item(item_id)
             print(f"{item} --> Score: {score:.2f}")
+        print("")
 
 
 class RecomanadorSimple(Recomanador):
