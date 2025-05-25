@@ -1,12 +1,12 @@
 import logging
 from recomanador import RecomanadorSimple, RecomanadorCollaboratiu, RecomanadorContingut
-from avaluador import Avaluador
+from avaluador import Avaluador  # assumeix que ja el tens
 import sys
 import pickle
 
 # Configuració del logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler("log.txt", mode='w'),
@@ -59,57 +59,59 @@ def main():
     logging.info("Inici del sistema de recomanació")
     usuari = input("Introdueix l'ID de l'usuari: ").strip()
 
+    opcio = ""
     while True and opcio != "3":
-        print("\nBenvingut al sistema de recomanació!")
         print("\nOpcions:")
         print("1. Recomanar ítems")
         print("2. Avaluar mètode")
         print("3. Sortir")
-        opcio = input("Escull una opció (1-3): ").strip()
+        opcio = input("Escull una opció (1-3):").strip()
 
         if opcio == "1":
             logging.info(f"Usuari {usuari} ha seleccionat recomanar ítems")
+            print("")
             tipus = seleccionar_dataset()
             ruta_items, ruta_valoracions = seleccionar_rutes(tipus)
             tipus_recomanador = seleccionar_recomanador()
             if tipus_recomanador == "simple":
                 recomanador = RecomanadorSimple(tipus, ruta_items, ruta_valoracions)
                 num_minim_vots = int(input("Introdueix el mínim de vots requerits: "))
+                print("")
                 recomanador.recomana(usuari, num_minim_vots)
             elif tipus_recomanador == "colaboratiu":
                 recomanador = RecomanadorCollaboratiu(tipus, ruta_items, ruta_valoracions)
                 num_usuaris_similars = int(input("Introdueix el nombre d'usuaris similars: "))
+                print("")
                 recomanador.recomana(usuari, num_usuaris_similars)
             elif tipus_recomanador == "contingut":
                 recomanador = RecomanadorContingut(tipus, ruta_items, ruta_valoracions)
+                print("")
                 recomanador.recomana(usuari)
-            else:
-                logging.error(f"Tipus de recomanador no vàlid: {tipus_recomanador}")
-                print("Tipus de recomanador no vàlid. Torna-ho a intentar.")
-                continue
             logging.info(f"Recomanacions per a l'usuari {usuari} amb el recomanador {tipus_recomanador} fetes amb èxit")
 
-        if opcio == "2":
-            logging.info(f"Usuari {usuari} ha seleccionat recomanar ítems")
+        elif opcio == "2":
+            logging.info(f"Usuari {usuari} ha seleccionat l'avaluador")
+            print("")
             tipus = seleccionar_dataset()
             ruta_items, ruta_valoracions = seleccionar_rutes(tipus)
+            recomanador = RecomanadorSimple(tipus, ruta_items, ruta_valoracions)
+            dataset = recomanador.dataset
             logging.info(f"Carregant dataset de {tipus} des de {ruta_items} i {ruta_valoracions}")
-            rmse = Avaluador.calcula_rmse()
-            mse = Avaluador.calcula_mae()
+            avaluador = Avaluador("valoracions reals", dataset.get_valoracions_numeriques()) # Aquí hauries de passar les valoracions reals
+            rmse = avaluador.calcula_rmse()
+            mse = avaluador.calcula_mae()
             print(f"RMSE: {rmse}, MAE: {mse}")
             logging.info(f"Avaluació del mètode feta amb èxit: RMSE={rmse}, MAE={mse}")
             
         elif opcio == "3":
+            print("")
             logging.info("Sortint del sistema de recomanació")
             print("Sortint...")
-            
 
         else:
             print("Opció no vàlida. Torna-ho a intentar.")
+            logging.warning(f"Opció no vàlida seleccionada pel menú principal: '{opcio}'")
             continue
-
-    logging.info("Programa finalitzat amb èxit")
 
 if __name__ == "__main__":
     main()
-#@arnibro bro thinks he is in xoi ahhhh moment
