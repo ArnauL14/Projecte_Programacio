@@ -46,6 +46,7 @@ def seleccionar_recomanador():
     """
     while True:
         op = input("Tipus de recomanador (simple, colaboratiu, contingut): ").strip().lower()
+        print("")
         if op == "simple":
             return op
         elif op == "colaboratiu":
@@ -66,6 +67,7 @@ def main():
         print("2. Avaluar mètode")
         print("3. Sortir")
         opcio = input("Escull una opció (1-3):").strip()
+        print("")
 
         if opcio == "1":
             logging.info(f"Usuari {usuari} ha seleccionat recomanar ítems")
@@ -75,12 +77,12 @@ def main():
             tipus_recomanador = seleccionar_recomanador()
             if tipus_recomanador == "simple":
                 recomanador = RecomanadorSimple(tipus, ruta_items, ruta_valoracions)
-                num_minim_vots = int(input("Introdueix el mínim de vots requerits: "))
+                num_minim_vots = int(input("\nIntrodueix el mínim de vots requerits: "))
                 print("")
                 recomanador.recomana(usuari, num_minim_vots)
             elif tipus_recomanador == "colaboratiu":
                 recomanador = RecomanadorCollaboratiu(tipus, ruta_items, ruta_valoracions)
-                num_usuaris_similars = int(input("Introdueix el nombre d'usuaris similars: "))
+                num_usuaris_similars = int(input("\nIntrodueix el nombre d'usuaris similars: "))
                 print("")
                 recomanador.recomana(usuari, num_usuaris_similars)
             elif tipus_recomanador == "contingut":
@@ -94,19 +96,20 @@ def main():
             print("")
             tipus = seleccionar_dataset()
             ruta_items, ruta_valoracions = seleccionar_rutes(tipus)
+            print("")
             recomanador = RecomanadorSimple(tipus, ruta_items, ruta_valoracions)
-            dataset = recomanador.dataset
-            logging.info(f"Carregant dataset de {tipus} des de {ruta_items} i {ruta_valoracions}")
-            avaluador = Avaluador("valoracions reals", dataset.get_valoracions_numeriques()) # Aquí hauries de passar les valoracions reals
+            dataset = recomanador.get_dataset()
+            matriu = recomanador.get_valoracions_numeriques()
+            logging.info(f"Carregant dataset de {tipus}")
+            avaluador = Avaluador(matriu, dataset) # Aquí hauries de passar les valoracions reals
             rmse = avaluador.calcula_rmse()
             mse = avaluador.calcula_mae()
-            print(f"RMSE: {rmse}, MAE: {mse}")
-            logging.info(f"Avaluació del mètode feta amb èxit: RMSE={rmse}, MAE={mse}")
+            logging.info(f"Avaluació del mètode feta amb èxit")
+            print(f"\nRMSE: {rmse}, MAE: {mse}")
             
         elif opcio == "3":
-            print("")
             logging.info("Sortint del sistema de recomanació")
-            print("Sortint...")
+            print("\nSortint...")
 
         else:
             print("Opció no vàlida. Torna-ho a intentar.")
