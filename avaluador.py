@@ -11,10 +11,9 @@ class Avaluador:
         dataset (Dataset): Instància del conjunt de dades utilitzat per a les recomanacions.
         valoracions (np.ndarray): Matriu de valoracions del dataset.
     """
-    def __init__(self, valoracins_reals, dataset): 
-        self._valoracins_reals = valoracins_reals # Matriu de valoracions reals
-        self._dataset = dataset
-        self._valoracions = dataset.get_valoracions_numeriques()
+    def __init__(self, valoracins_reals, scores): 
+        self._valoracins_reals = valoracins_reals
+        self._scores = scores
 
     def calcula_mae(self):
         """
@@ -22,9 +21,9 @@ class Avaluador:
         MAE (Mean Absolute Error), una mètrica per valorar la precisió de les prediccions.
         """
         logging.info("Calculant MAE...")
-        if self._valoracins_reals.shape != self._valoracions.shape:
+        if self._valoracins_reals.shape != self._scores.shape:
             raise ValueError("Les matrius de valoracions reals i recomanades no tenen la mateixa forma.")
-        mae = np.mean(np.abs(self._valoracins_reals - self._valoracions))
+        mae = np.mean(np.abs(self._valoracins_reals - self._scores))
         logging.info("MAE calculat amb èxit.")
         return mae
     
@@ -34,9 +33,9 @@ class Avaluador:
         RMSE , una mètrica per valorar la precisió de les prediccions
         """
         logging.info("Calculant RMSE...")
-        if self._valoracins_reals.shape != self._valoracions.shape:
+        if self._valoracins_reals.shape != self._scores.shape:
             raise ValueError("Les matrius de valoracions reals i recomanades no tenen la mateixa forma.")
-        mse = np.mean((self._valoracins_reals - self._valoracions) ** 2)
+        mse = np.mean((self._valoracins_reals - self._scores) ** 2)
         rmse = np.sqrt(mse)
         logging.info("RMSE calculat amb èxit.")
         return rmse
