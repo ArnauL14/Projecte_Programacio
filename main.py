@@ -66,7 +66,7 @@ def main():
         print("1. Recomanar ítems")
         print("2. Avaluar mètode")
         print("3. Sortir")
-        opcio = input("Escull una opció (1-3):").strip()
+        opcio = input("Escull una opció (1-3): ").strip()
         print("")
 
         if opcio == "1":
@@ -99,9 +99,12 @@ def main():
             print("")
             recomanador = RecomanadorSimple(tipus, ruta_items, ruta_valoracions)
             dataset = recomanador.get_dataset()
-            matriu = recomanador.get_valoracions_numeriques()
+            num_minim_vots = int(input("\nIntrodueix el mínim de vots requerits: "))
+            print("")
+            scores = recomanador.prediu_tot(usuari, num_minim_vots)
+            valoracions_reals = dataset.get_valoracions_usuari(usuari)
             logging.info(f"Carregant dataset de {tipus}")
-            avaluador = Avaluador(matriu, dataset) # Aquí hauries de passar les valoracions reals
+            avaluador = Avaluador(valoracions_reals, scores)
             rmse = avaluador.calcula_rmse()
             mse = avaluador.calcula_mae()
             logging.info(f"Avaluació del mètode feta amb èxit")
