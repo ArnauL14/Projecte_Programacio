@@ -134,7 +134,7 @@ class RecomanadorSimple(Recomanador):
     def recomana(self, usuari_id, n):  # n: mínim de vots requerits
         """
         Genera recomanacions basades en valoracions mitjanes i nombre de vots.
-        
+        Ignora els ítems que l'usuari ja ha valorat.
         Args:
             usuari_id (str): ID de l'usuari per al qual es generen recomanacions.
             n (int): Mínim de vots requerits per considerar un ítem.
@@ -183,6 +183,50 @@ class RecomanadorSimple(Recomanador):
         logging.info(f"Recomanacions generades per a l'usuari {usuari_id}.")
         self.mostrar_recomancions(llista_scores[:5])
         return llista_scores
+    
+    def prediu_tot(self, usuari_id, n):
+        """
+        Retorna una matriu de 1 x N amb els scores predits per a TOTS els ítems per un usuari.
+
+        Args:
+            usuari_id (str): ID de l'usuari per al qual es generen les prediccions.
+            n (int): Mínim de vots requerits per considerar un ítem.
+
+        Returns:
+            np.ndarray: Matriu 1 x N amb els scores (prediccions) per a cada item_id.
+        """
+        logging.info("Generant matriu de prediccions per a tots els ítems...")
+        
+        matriu = self._matriu
+        idx_usuari = self.trobar_index_usuari(usuari_id)
+        if idx_usuari is None:
+            logging.warning(f"Usuari {usuari_id} no trobat")
+            return np.zeros((1, matriu.shape[1] - 1))
+
+        avg_global = self.calcula_mitjana_global()
+        num_items = matriu.shape[1] - 1  # excloem columna d'usuaris
+        scores = np.zeros((1, num_items))  # 1 fila, N columnes
+
+        for j in range(1, matriu.shape[1]):
+            valoracions_item = [
+                float(matriu[i][j])
+                for i in range(1, matriu.shape[0])
+                if matriu[i][j] != 0
+            ]
+            v = len(valoracions_item)
+
+            if v >= n:
+                try:
+                    avg_item = sum(valoracions_item) / v
+                    score = (v / (v + n)) * avg_item + (n / (v + n)) * avg_global
+                    scores[0, j - 1] = score
+                except ZeroDivisionError:
+                    logging.error(f"ZeroDivisionError en l'ítem {matriu[0][j]}")
+                    scores[0, j - 1] = 0.0
+
+        return scores
+
+
     
 
 class RecomanadorCollaboratiu(Recomanador):
@@ -372,7 +416,11 @@ class RecomanadorContingut(Recomanador):
 
 """print("Simple")
 reco = RecomanadorSimple("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
-scores = reco.recomana("10", 0)
+dataset = reco.get_dataset()
+valoracions_reals = dataset.get_valoracions_usuari("1")
+scores = reco.prediu_tot("1", 5)
+print(f"Longitud dels scores {scores.shape[1]}")  
+print(f"Longitud de les valoracions reals {valoracions_reals.shape[1]}")
 print("")
 
 print("Colaboratiu")
@@ -383,11 +431,11 @@ print("")
 print("Contingut")
 reco3 = RecomanadorContingut("pelicules","dataset/MovieLens100k/movies.csv", "dataset/MovieLens100k/ratings.csv")
 reco3.recomana("1") #@Iker, els scores de aquesta funció sembla que van de 0 a 1, no sé si és correcte o no
-print("")"""
+print("")
 
-"""print("Simple Llibres")
+print("Simple Llibres")
 reco = RecomanadorSimple("llibres", "dataset/Books/prova_llibres.csv", "dataset/Books/prova_valoracions.csv")
-scores = reco.recomana("1", 0)
+scores = reco.prediu_tot("276725", 5)
 print(scores)"""
 
 """
