@@ -14,6 +14,14 @@ class Recomanador(ABC):
             raise ValueError("Tipus de dataset no reconegut")
         self.matriu = self.dataset.get_valoracions().astype(object)
 
+    def get_dataset(self): 
+        """
+        Retorna el dataset associat al recomanador.
+        Returns:
+            Dataset: El dataset utilitzat pel recomanador.
+        """
+        return self.dataset
+
     @abstractmethod
     def recomana(self, usuari_id, n):
         """
